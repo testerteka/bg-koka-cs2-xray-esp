@@ -1,12 +1,10 @@
-﻿using System.Runtime.InteropServices;
-using CounterStrikeSharp.API;
+﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Commands;
-using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
+using CounterStrikeSharp.API.Modules.Cvars;
 using CounterStrikeSharp.API.Modules.Utils;
-using Microsoft.Extensions.Logging;
 
 namespace AdminESP;
 
@@ -14,17 +12,17 @@ public sealed partial class AdminESP : BasePlugin, IPluginConfig<Config>
 {
     public override string ModuleName => "Admin ESP";
     public override string ModuleAuthor => "AquaVadis";
-    public override string ModuleVersion => "1.1.0s";
+    public override string ModuleVersion => "1.1.1s";
     public override string ModuleDescription => "Plugin uses code borrowed from CS2Fixes / cs2kz-metamod / hl2sdk / unknown cheats and xstage from CS# discord";
 
     public bool[] toggleAdminESP = new bool[64];
     public bool togglePlayersGlowing = false;
     public Config Config { get; set; } = new();
+    private static readonly ConVar? _forceCamera = ConVar.Find("mp_forcecamera");
 
     public override void Load(bool hotReload)
     {
         RegisterListeners();
-        
 
         if (hotReload) {
       
@@ -36,7 +34,6 @@ public sealed partial class AdminESP : BasePlugin, IPluginConfig<Config>
                     cachedPlayers.Add(player);
 
             }
-
         }
 
     }
@@ -78,13 +75,17 @@ public sealed partial class AdminESP : BasePlugin, IPluginConfig<Config>
 
                     if (toggleAdminESP[player.Slot] is true) {
                         
-                        if (togglePlayersGlowing is not true || AreThereEsperingAdmins() is not true)
+                        if (togglePlayersGlowing is not true || AreThereEsperingAdmins() is not true) {
                             SetAllPlayersGlowing();
+                        }
+                        //player.ReplicateConVar("mp_forcecamera", "0");
                     }
                     else {
 
-                        if (togglePlayersGlowing is not true || AreThereEsperingAdmins() is not true) 
-                            RemoveAllGlowingPlayers();   
+                        if (togglePlayersGlowing is not true || AreThereEsperingAdmins() is not true) {
+                            RemoveAllGlowingPlayers();
+                        }
+                        //player.ReplicateConVar("mp_forcecamera", _forceCamera is not null ? _forceCamera.GetPrimitiveValue<int>().ToString() : "1");
                     }
                     
 
@@ -97,13 +98,17 @@ public sealed partial class AdminESP : BasePlugin, IPluginConfig<Config>
 
                         if (toggleAdminESP[player.Slot] is true) {
 
-                            if (togglePlayersGlowing is not true || AreThereEsperingAdmins() is not true)
+                            if (togglePlayersGlowing is not true || AreThereEsperingAdmins() is not true) {
                                 SetAllPlayersGlowing();
+                            }
+                            //player.ReplicateConVar("mp_forcecamera", "0");
                         }
                         else {
 
-                            if (togglePlayersGlowing is not true || AreThereEsperingAdmins() is not true) 
+                            if (togglePlayersGlowing is not true || AreThereEsperingAdmins() is not true) {
                                 RemoveAllGlowingPlayers();
+                            }
+                            //player.ReplicateConVar("mp_forcecamera", _forceCamera is not null ? _forceCamera.GetPrimitiveValue<int>().ToString() : "1");
                         }
 
                         SendMessageToSpecificChat(player, msg: $"Admin ESP has been " + (toggleAdminESP[player.Slot] ? "{GREEN}enabled!" : "{RED}disabled!"), print: PrintTo.Chat);
